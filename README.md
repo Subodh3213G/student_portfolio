@@ -8,16 +8,17 @@ A professional portfolio builder for students that automatically creates a perso
 
 ### 1. **AI-Powered Resume Parsing**
 - Upload a PDF resume, and the system automatically extracts:
-  - Personal Information (Name, Bio, Title)
+  - Personal Information (Name, Bio, Title, Contact)
   - Education History
   - Work Experience
-  - Projects
+  - Projects (including Technologies)
+  - **Achievements & Certifications**
   - Skills
 - Powered by **Google Gemini 1.5 Flash** for high-accuracy data extraction.
 - Uses `pdf-parse` for text extraction.
 
 ### 2. **Professional Dashboard**
-- **Dynamic Forms**: Edit and refine your parsed data manually.
+- **Dynamic Forms**: Edit and refine your parsed data manually, including new sections for Social Links (LinkedIn, LeetCode, GitHub) and Achievements.
 - **Profile Photo**: Upload and store profile pictures securely using Supabase Storage.
 - **Visual Feedback**: Real-time loading states and success notifications.
 
@@ -27,14 +28,17 @@ A professional portfolio builder for students that automatically creates a perso
 - SEO-optimized with proper metadata.
 
 ### 4. **Authentication & Security**
-- Secure Email/Password login via **Supabase Auth**.
+- **Multi-Method Login**:
+  - Secure Email/Password via **Supabase Auth**.
+  - **Social Login**: Google and GitHub OAuth integration.
+  - **Phone Authentication**: SMS OTP login powered by Twilio.
 - **Middleware Protection**: Redirects unauthenticated users from the dashboard and logged-in users from login pages.
 - **Row Level Security (RLS)**: Users can only edit their own data.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15+ (App Router), Tailwind CSS
-- **Backend/Database**: Supabase (PostgreSQL, Auth, Storage)
+- **Backend/Database**: Supabase (PostgreSQL, Auth, Storage), Twilio (SMS Provider)
 - **AI**: Vercel AI SDK + Google Gemini API
 - **Deployment**: Vercel
 
