@@ -20,7 +20,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+      <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-8 lg:h-[60px] lg:px-20">
         <Link className="flex items-center gap-2 font-semibold" href="/">
           <span>StudentPortfolio</span>
         </Link>
