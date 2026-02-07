@@ -8,7 +8,6 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
-  // 1. Create client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -18,31 +17,32 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value) // Update request cookies
-          )
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           response = NextResponse.next({
             request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options) // Update response cookies
+            response.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
-  // 2. Refresh auth token
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // refresh session if expired - required for Server Components
+  // https://supabase.com/docs/guides/auth/server-side/nextjs
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // 3. Protected Routes Logic
-  // If no user and trying to access dashboard/admin, redirect to login
-  if (!user && (request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/admin'))) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
+  // Protected routes
+  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+      if (!user) {
+          return NextResponse.redirect(new URL('/login', request.url))
+      }
+  }
+
+  // Redirect to dashboard if logged in and visiting login/signup
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return response
