@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Student Portfolio Builder (with AI Resume Parsing)
 
-## Getting Started
+🚀 **Live Demo:** [https://portfolio-student-gecdahod.vercel.app/](https://portfolio-student-gecdahod.vercel.app/)
 
-First, run the development server:
+A professional portfolio builder for students that automatically creates a personal website by parsing their existing PDF resume. Built with Next.js, Supabase, and Google Gemini AI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🌟 Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1. **AI-Powered Resume Parsing**
+- Upload a PDF resume, and the system automatically extracts:
+  - Personal Information (Name, Bio, Title)
+  - Education History
+  - Work Experience
+  - Projects
+  - Skills
+- Powered by **Google Gemini 1.5 Flash** for high-accuracy data extraction.
+- Uses `pdf-parse` for text extraction.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. **Professional Dashboard**
+- **Dynamic Forms**: Edit and refine your parsed data manually.
+- **Profile Photo**: Upload and store profile pictures securely using Supabase Storage.
+- **Visual Feedback**: Real-time loading states and success notifications.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. **Public Portfolio Page**
+- Automatically generates a public link for every user (e.g., `/[username]`).
+- Clean, responsive design built with Tailwind CSS.
+- SEO-optimized with proper metadata.
 
-## Learn More
+### 4. **Authentication & Security**
+- Secure Email/Password login via **Supabase Auth**.
+- **Middleware Protection**: Redirects unauthenticated users from the dashboard and logged-in users from login pages.
+- **Row Level Security (RLS)**: Users can only edit their own data.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Frontend**: Next.js 15+ (App Router), Tailwind CSS
+- **Backend/Database**: Supabase (PostgreSQL, Auth, Storage)
+- **AI**: Vercel AI SDK + Google Gemini API
+- **Deployment**: Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 How It Works
 
-## Deploy on Vercel
+1.  **Sign Up**: Create an account to get your personal dashboard.
+2.  **Upload Resume**: Drag and drop your PDF resume.
+    - The backend reads the PDF (`pdf-parse`).
+    - The text is sent to Google Gemini with a structured schema prompt.
+    - Gemini returns a JSON object with your experience, education, and skills.
+3.  **Review & Save**: The form auto-fills with the AI data. You can edit any details or add a profile photo.
+4.  **Save Portfolio**: Clicking "Save" updates your Supabase database entries.
+5.  **Share**: Your public profile is instantly available at your unique URL.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📦 Local Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/Subodh3213G/student_portfolio.git
+    cd student-portfolio
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+
+3.  **Set up Environment Variables**:
+    Create a `.env.local` file in the root with:
+    ```env
+    # Supabase (Get from Project Settings > API)
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+    # Google AI (Get from aistudio.google.com)
+    GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+    ```
+
+4.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
+
+5.  Open [http://localhost:3000](http://localhost:3000) to see the app.
