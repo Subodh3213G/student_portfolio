@@ -54,3 +54,75 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+export async function signInWithGoogle() {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+    }
+  })
+
+  if (error) {
+     console.error('Google Auth Error:', error)
+     redirect('/login?error=GoogleAuthFailed')
+  }
+
+  if (data.url) {
+    redirect(data.url)
+  }
+}
+
+export async function signInWithGithub() {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+    }
+  })
+
+  if (error) {
+     console.error('Github Auth Error:', error)
+     redirect('/login?error=GithubAuthFailed')
+  }
+
+  if (data.url) {
+    redirect(data.url)
+  }
+}
+
+export async function sendOtp(formData: FormData) {
+  const phone = formData.get('phone') as string
+  const supabase = await createClient()
+  
+  const { error } = await supabase.auth.signInWithOtp({
+    phone,
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+  
+  return { success: true }
+}
+
+export async function verifyOtp(formData: FormData) {
+  const phone = formData.get('phone') as string
+  const token = formData.get('token') as string
+  const supabase = await createClient()
+
+  const { error } = await supabase.auth.verifyOtp({
+    phone,
+    token, // The OTP Code
+    type: 'sms',
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/dashboard')
+}

@@ -77,6 +77,12 @@ export async function POST(req: Request) {
         start_date: z.string().optional(),
         end_date: z.string().optional(),
       })).optional(),
+      achievements: z.array(z.object({
+        title: z.string().describe("Certification or Award name"),
+        issuer: z.string().optional().describe("Issuing organization or platform"),
+        date: z.string().optional().describe("Date received or issued"),
+        description: z.string().optional().describe("Brief details"),
+      })).optional(),
     })
 
     // Call LLM (Gemini via AI SDK)

@@ -163,3 +163,33 @@ create policy "Admins can update all profiles."
   using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'admin') );
 
 -- Same for other tables if needed.
+
+-- ACHIEVEMENTS TABLE
+create table public.achievements (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  title text not null,
+  issuer text,
+  date date,
+  description text,
+  url text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.achievements enable row level security;
+
+create policy "Achievements are viewable by everyone."
+  on public.achievements for select
+  using ( true );
+
+create policy "Users can insert their own achievements."
+  on public.achievements for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can update their own achievements."
+  on public.achievements for update
+  using ( auth.uid() = user_id );
+
+create policy "Users can delete their own achievements."
+  on public.achievements for delete
+  using ( auth.uid() = user_id );

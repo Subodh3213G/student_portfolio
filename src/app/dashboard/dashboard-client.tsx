@@ -34,6 +34,15 @@ interface Education {
   end_date: string;
 }
 
+interface Achievement {
+  id?: string;
+  title: string;
+  issuer: string;
+  date: string; // Issue date
+  description: string;
+  url: string;
+}
+
 export default function DashboardClient({ initialData }: { initialData: any }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -45,13 +54,20 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
     skills: initialData?.skills?.join(', ') || '',
     github_link: initialData?.social_links?.github || '',
     linkedin_link: initialData?.social_links?.linkedin || '',
+    leetcode_link: initialData?.social_links?.leetcode || '',
+    phone: initialData?.social_links?.phone || '',
+    display_email: initialData?.social_links?.email || initialData?.email || '',
     avatar_url: initialData?.avatar_url || '',
   })
 
   // Arrays for complex fields
   const [experiences, setExperiences] = useState<Experience[]>(initialData?.experiences || [])
-  const [projects, setProjects] = useState<Project[]>(initialData?.projects || [])
+  const [projects, setProjects] = useState<Project[]>((initialData?.projects || []).map((p: any) => ({
+    ...p,
+    technologies: p.tags || p.technologies || [] // Map DB 'tags' to UI 'technologies'
+  })))
   const [educations, setEducations] = useState<Education[]>(initialData?.educations || [])
+  const [achievements, setAchievements] = useState<Achievement[]>(initialData?.achievements || [])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return
@@ -86,6 +102,7 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
       if (data.experiences) setExperiences(data.experiences)
       if (data.projects) setProjects(data.projects)
       if (data.educations) setEducations(data.educations)
+      if (data.achievements) setAchievements(data.achievements)
       
       console.log('Parsed Data:', data)
       alert('Resume parsed successfully! Please review the extracted data.')
@@ -107,6 +124,7 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
       experiences,
       projects: projects.map(p => ({ ...p, technologies: Array.isArray(p.technologies) ? p.technologies : [] })),
       educations,
+      achievements,
     }
 
     const result = await updateProfile(formData)
@@ -130,11 +148,15 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
   const addEducation = () => {
     setEducations([...educations, { school: '', degree: '', field_of_study: '', start_date: '', end_date: '' }])
   }
+  const addAchievement = () => {
+    setAchievements([...achievements, { title: '', issuer: '', date: '', description: '', url: '' }])
+  }
 
   // Helper to remove items
   const removeExperience = (index: number) => setExperiences(experiences.filter((_, i) => i !== index))
   const removeProject = (index: number) => setProjects(projects.filter((_, i) => i !== index))
   const removeEducation = (index: number) => setEducations(educations.filter((_, i) => i !== index))
+  const removeAchievement = (index: number) => setAchievements(achievements.filter((_, i) => i !== index))
 
   // Field change handlers
   const updateExperience = (index: number, field: string, value: string) => {
@@ -161,6 +183,11 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
     const newEdus = [...educations]
     newEdus[index] = { ...newEdus[index], [field]: value }
     setEducations(newEdus)
+  }
+   const updateAchievement = (index: number, field: string, value: string) => {
+    const newAch = [...achievements]
+    newAch[index] = { ...newAch[index], [field]: value }
+    setAchievements(newAch)
   }
 
   return (
@@ -285,6 +312,61 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
                    />
                 </div>
              </div>
+          </section>
+
+          {/* Contact & Social Links */}
+          <section className="bg-card border rounded-lg p-6 space-y-4">
+            <h3 className="text-xl font-semibold">Contact & Social Links</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                   <label className="block text-sm font-medium mb-1">Public Email</label>
+                   <input 
+                     type="email" 
+                     className="w-full rounded-md border p-2 bg-background" 
+                     value={profile.display_email} 
+                     onChange={e => setProfile({...profile, display_email: e.target.value})}
+                   />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium mb-1">Phone Number</label>
+                   <input 
+                     type="tel" 
+                     className="w-full rounded-md border p-2 bg-background" 
+                     value={profile.phone} 
+                     onChange={e => setProfile({...profile, phone: e.target.value})}
+                   />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium mb-1">LinkedIn URL</label>
+                   <input 
+                     type="url" 
+                     className="w-full rounded-md border p-2 bg-background" 
+                     placeholder="https://linkedin.com/in/..."
+                     value={profile.linkedin_link} 
+                     onChange={e => setProfile({...profile, linkedin_link: e.target.value})}
+                   />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium mb-1">GitHub URL</label>
+                   <input 
+                     type="url" 
+                     className="w-full rounded-md border p-2 bg-background" 
+                     placeholder="https://github.com/..."
+                     value={profile.github_link} 
+                     onChange={e => setProfile({...profile, github_link: e.target.value})}
+                   />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium mb-1">LeetCode URL</label>
+                   <input 
+                     type="url" 
+                     className="w-full rounded-md border p-2 bg-background" 
+                     placeholder="https://leetcode.com/..."
+                     value={profile.leetcode_link} 
+                     onChange={e => setProfile({...profile, leetcode_link: e.target.value})}
+                   />
+                </div>
+            </div>
           </section>
 
          {/* Experiences */}
@@ -458,8 +540,65 @@ export default function DashboardClient({ initialData }: { initialData: any }) {
                ))}
             </div>
          </section>
-         
-         <div className="sticky bottom-4 flex justify-end">
+
+          {/* Achievements */}
+          <section className="bg-card border rounded-lg p-6 space-y-4">
+             <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold">Achievements & Certifications</h3>
+                <button type="button" onClick={addAchievement} className="flex items-center text-sm text-primary hover:underline">
+                   <Plus className="h-4 w-4 mr-1" /> Add
+                </button>
+             </div>
+             <div className="space-y-6">
+                {achievements.map((item, idx) => (
+                   <div key={idx} className="bg-muted/30 p-4 rounded-md relative group">
+                      <button 
+                         type="button" 
+                         onClick={() => removeAchievement(idx)}
+                         className="absolute top-2 right-2 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                         <Trash2 className="h-4 w-4" />
+                      </button>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <input 
+                            placeholder="Title / Certificate Name" 
+                            className="rounded-md border p-2 bg-background"
+                            value={item.title}
+                            onChange={e => updateAchievement(idx, 'title', e.target.value)}
+                         />
+                         <input 
+                            placeholder="Issuer / Organization" 
+                            className="rounded-md border p-2 bg-background"
+                            value={item.issuer}
+                            onChange={e => updateAchievement(idx, 'issuer', e.target.value)}
+                         />
+                         <div className="grid grid-cols-2 gap-2">
+                            <input 
+                               placeholder="Date (DD-MM-YYYY)" 
+                               className="rounded-md border p-2 bg-background"
+                               value={item.date}
+                               onChange={e => updateAchievement(idx, 'date', e.target.value)}
+                            />
+                            <input 
+                               placeholder="Credential URL" 
+                               className="rounded-md border p-2 bg-background"
+                               value={item.url}
+                               onChange={e => updateAchievement(idx, 'url', e.target.value)}
+                            />
+                         </div>
+                         <textarea 
+                            className="md:col-span-2 rounded-md border p-2 bg-background min-h-[60px]"
+                            placeholder="Description..."
+                            value={item.description}
+                            onChange={e => updateAchievement(idx, 'description', e.target.value)}
+                         />
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </section>
+          
+          <div className="sticky bottom-4 flex justify-end">
             <button 
               type="submit" 
               disabled={loading}

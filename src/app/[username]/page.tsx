@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Metadata } from 'next'
+import { Mail, Phone, Linkedin, Github, Code, Globe } from 'lucide-react'
 
 // Helper to generate Metadata
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
@@ -25,7 +26,7 @@ export default async function PublicProfile({
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('*, experiences(*), projects(*), educations(*)')
+    .select('*, experiences(*), projects(*), educations(*), achievements(*)')
     .eq('username', username)
     .single()
 
@@ -54,8 +55,49 @@ export default async function PublicProfile({
           {profile.bio}
         </div>
         
-        {/* Social Links could go here */}
+        {/* Social Links */}
+        <div className="flex justify-center gap-4 mt-6 flex-wrap">
+          {profile.social_links?.email && (
+            <a href={`mailto:${profile.social_links.email}`} className="p-2 border rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary" title="Email">
+              <Mail className="h-5 w-5" />
+            </a>
+          )}
+          {profile.social_links?.phone && (
+            <a href={`tel:${profile.social_links.phone}`} className="p-2 border rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary" title="Phone">
+              <Phone className="h-5 w-5" />
+            </a>
+          )}
+          {profile.social_links?.linkedin && (
+            <a href={profile.social_links.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary" title="LinkedIn">
+              <Linkedin className="h-5 w-5" />
+            </a>
+          )}
+          {profile.social_links?.github && (
+            <a href={profile.social_links.github} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary" title="GitHub">
+              <Github className="h-5 w-5" />
+            </a>
+          )}
+          {profile.social_links?.leetcode && (
+            <a href={profile.social_links.leetcode} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary" title="LeetCode">
+              <Code className="h-5 w-5" />
+            </a>
+          )}
+        </div>
       </section>
+
+      {/* Skills */}
+      {profile.skills && profile.skills.length > 0 && (
+        <section>
+          <h2 className="text-xl font-bold mb-4">Skills</h2>
+          <div className="flex flex-wrap gap-2">
+            {profile.skills.map((skill: string) => (
+              <span key={skill} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-medium">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Experience */}
       {profile.experiences && profile.experiences.length > 0 && (
@@ -116,6 +158,32 @@ export default async function PublicProfile({
                     <h3 className="font-semibold">{edu.school}</h3>
                     <p className="text-muted-foreground">{edu.degree}, {edu.field_of_study}</p>
                     <p className="text-sm text-muted-foreground">{edu.start_date} - {edu.end_date}</p>
+                </div>
+              ))}
+            </div>
+         </section>
+      )}
+
+      {/* Achievements & Certifications */}
+      {profile.achievements && profile.achievements.length > 0 && (
+         <section>
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2">Achievements & Certifications</h2>
+            <div className="space-y-4">
+              {profile.achievements.sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()).map((item: any) => (
+                <div key={item.id} className="bg-card border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-1">
+                        <div>
+                             <h3 className="font-semibold text-lg">{item.title}</h3>
+                             <p className="text-muted-foreground">{item.issuer}</p>
+                        </div>
+                        {item.date && <span className="text-sm text-muted-foreground whitespace-nowrap">{item.date}</span>}
+                    </div>
+                    {item.description && <p className="text-sm text-muted-foreground mb-2 whitespace-pre-line">{item.description}</p>}
+                    {item.url && (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline font-medium">
+                            View Credential
+                        </a>
+                    )}
                 </div>
               ))}
             </div>

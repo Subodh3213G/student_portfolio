@@ -21,6 +21,13 @@ export async function updateProfile(formData: any) {
         bio: formData.bio,
         skills: formData.skills, 
         avatar_url: formData.avatar_url,
+        social_links: {
+            github: formData.github_link,
+            linkedin: formData.linkedin_link,
+            leetcode: formData.leetcode_link,
+            email: formData.display_email,
+            phone: formData.phone
+        }
       })
       .eq('id', user.id)
 
@@ -86,6 +93,21 @@ export async function updateProfile(formData: any) {
         }))
         const { error: projError } = await supabase.from('projects').insert(projectsToInsert)
         if (projError) throw projError
+    }
+
+    // 5. Update Achievements
+    await supabase.from('achievements').delete().eq('user_id', user.id)
+    if (formData.achievements && formData.achievements.length > 0) {
+        const achievementsToInsert = formData.achievements.map((ach: any) => ({
+            user_id: user.id,
+            title: ach.title,
+            issuer: ach.issuer,
+            date: formatDateForDB(ach.date),
+            description: ach.description,
+            url: ach.url
+        }))
+        const { error: achError } = await supabase.from('achievements').insert(achievementsToInsert)
+        if (achError) throw achError
     }
 
     revalidatePath('/dashboard')

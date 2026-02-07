@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   // Fetch existing profile data
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*, experiences(*), projects(*), educations(*)')
+    .select('*, experiences(*), projects(*), educations(*), achievements(*)')
     .eq('id', user.id)
     .single()
 
