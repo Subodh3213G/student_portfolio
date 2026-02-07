@@ -8,9 +8,18 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
+  // CHECK ENV VARS
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Middleware Error: Missing Supabase Environment Variables')
+    return response // Proceed without auth to avoid 500
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -31,19 +40,24 @@ export async function updateSession(request: NextRequest) {
 
   // refresh session if expired - required for Server Components
   // https://supabase.com/docs/guides/auth/server-side/nextjs
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+      const { data: { user } } = await supabase.auth.getUser()
 
-  // Protected routes
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-      if (!user) {
-          return NextResponse.redirect(new URL('/login', request.url))
+      // Protected routes
+      if (request.nextUrl.pathname.startsWith('/dashboard')) {
+          if (!user) {
+              return NextResponse.redirect(new URL('/login', request.url))
+          }
       }
-  }
 
-  // Redirect to dashboard if logged in and visiting login/signup
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      // Redirect to dashboard if logged in and visiting login/signup
+      if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+  } catch (error) {
+      console.error('Middleware Auth Error:', error)
+      // On error, just return response, don't crash the app
   }
-
+  
   return response
 }
