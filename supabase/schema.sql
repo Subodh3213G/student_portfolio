@@ -131,16 +131,24 @@ create policy "Users can delete their own educations."
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (id, email, username, full_name, avatar_url)
+  values (
+    new.id, 
+    new.email, 
+    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    coalesce(new.raw_user_meta_data->>'avatar_url', '')
+  );
   return new;
 end;
 $$ language plpgsql security definer;
 
--- TRIGGER for new user
+-- Trigger the function every time a user is created
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
 
 -- ADMIN POLICIES (Example: Allow admins to do everything)
 -- For simplicity, assume admin check is done via role field in profiles
