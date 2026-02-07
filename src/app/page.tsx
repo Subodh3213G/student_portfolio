@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
+import { logout } from '@/app/auth/actions'
+
 export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -8,7 +10,7 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
+        <div className="container flex h-14 items-center mx-auto px-4">
           <div className="mr-4 flex">
             <Link className="mr-6 flex items-center space-x-2 font-bold" href="/">
               StudentPortfolio
@@ -17,9 +19,16 @@ export default async function Home() {
           <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
             <nav className="flex items-center space-x-6 text-sm font-medium">
               {user ? (
-                <Link href="/dashboard" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                   Go to Dashboard
-                </Link>
+                <>
+                  <Link href="/dashboard" className="transition-colors hover:text-foreground/80 text-foreground/60">
+                     Go to Dashboard
+                  </Link>
+                  <form action={logout}>
+                    <button type="submit" className="transition-colors hover:text-foreground/80 text-foreground/60">
+                      Logout
+                    </button>
+                  </form>
+                </>
               ) : (
                 <>
                   <Link href="/login" className="transition-colors hover:text-foreground/80 text-foreground/60">
